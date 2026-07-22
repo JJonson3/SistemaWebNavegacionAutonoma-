@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Decisiones A*</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #58a6ff;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        select {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #161b22;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+        th {
+            background-color: #21262d;
+            color: #58a6ff;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #1f242c;
+        }
+        .condicion { color: #f2cc60; }
+        .decision { font-weight: bold; }
+        .evitar { color: #f85149; }
+        .avanzar { color: #3fb950; }
+        .evaluar { color: #58a6ff; }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 Tabla de Decisiones (Algoritmo A*)</h1>
+    
+    <div class="controls" id="controls-div" style="display: none;">
+        <select id="selector-vehiculo">
+            <!-- Options dynamically populated -->
+        </select>
+    </div>
+
+    <table id="tabla-decisiones">
+        <thead>
+            <tr>
+                <th>Celda (Fila, Col)</th>
+                <th>Condición (Obstáculo)</th>
+                <th>Decisión Tomada</th>
+                <th>Razón (Reglas del Vehículo)</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpo-tabla">
+            <tr>
+                <td colspan="4" class="no-data">No hay datos de decisiones. Ejecuta una simulación primero.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="js/decisiones.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Navegación Autónoma con algoritmo A* - Simulación interactiva de rutas para vehículos inteligentes con análisis comparativo y telemetría en tiempo real.">
+    <meta name="theme-color" content="#0d1117">
+    <title>Sistema de Navegación Autónoma A* | Simulador Interactivo</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Three.js CDN (lightweight) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js" defer></script>
+</head>
+<body>
+
+
+    <div class="app-wrapper">
+
+        <!-- === HEADER === -->
+        <header class="app-header">
+            <h1>⚡ Sistema Web de Navegación Autónoma </h1>
+            <p class="subtitle">Simulación inteligente de rutas con análisis comparativo y telemetría en tiempo real, mediante Cálculo de Rutas Óptimas y Evasión de Obstáculos</p>
+        </header>
+
+        <!-- === INSTRUCCIONES === -->
+        <nav class="instrucciones" aria-label="Guía de controles">
+            <span class="instruccion-item">🟢 Clic Izq: Punto de Inicio</span>
+            <span class="instruccion-item">🔴 Clic Der: Punto de Destino</span>
+            <span class="instruccion-item">🟠 Tecla P (Hover): Parada</span>
+            <span class="instruccion-item">🎥 Ctrl+Arrastrar: Rotar Cámara</span>
+            <span class="instruccion-item">🖐️ Espacio+Arrastrar: Desplazarse</span>
+            <span class="instruccion-item">🟣 Shift+Clic: Rotar Obstáculos</span>
+            <span class="instruccion-item">🟤 Alt+Clic: Alternar Terrenos</span>
+        </nav>
+
+        <!-- === CONTENIDO PRINCIPAL === -->
+        <main class="main-content">
+
+            <!-- Mapa Canvas -->
+            <section class="mapa-container" id="mapa-wrapper">
+                <canvas id="mapa-canvas"></canvas>
+            </section>
+
+            <!-- Panel de Estadísticas -->
+            <aside class="stats-panel">
+
+                <!-- Configuración -->
+                <div class="glass-card" id="card-config">
+                    <h3>Configuración</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">Vehículo</span>
+                        <span class="stat-value" id="stat-vehiculo">—</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Velocidad</span>
+                        <span class="stat-value" id="stat-velocidad">—</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Misión</span>
+                        <span class="stat-value" id="stat-mision">—</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Prioridad</span>
+                        <span class="stat-value" id="stat-prioridad">—</span>
+                    </div>
+                </div>
+
+                <!-- Análisis A* -->
+                <div class="glass-card" id="card-astar">
+                    <h3>Análisis A*</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">Pasos Totales</span>
+                        <span class="stat-value" id="stat-pasos">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Nodos Explorados</span>
+                        <span class="stat-value" id="stat-nodos">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Costo de Ruta</span>
+                        <span class="stat-value" id="stat-costo">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Análisis Matemático -->
+                <div class="glass-card" id="card-matematica">
+                    <h3>Análisis Matemático</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">Distancia</span>
+                        <span class="stat-value" id="stat-distancia">0.00 km</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tiempo Estimado</span>
+                        <span class="stat-value" id="stat-tiempo">0 seg</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Eficiencia Energét.</span>
+                        <span class="stat-value" id="stat-eficiencia">0.00 km/u</span>
+                    </div>
+                </div>
+
+                <!-- Batería y Consumo -->
+                <div class="glass-card" id="card-bateria">
+                    <h3>Batería y Consumo</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">Nivel de Carga</span>
+                        <span class="stat-value" id="stat-bateria">100.0%</span>
+                    </div>
+                    <div class="bateria-bar-container">
+                        <div class="bateria-bar-fill" id="bateria-fill"></div>
+                        <span class="bateria-bar-text" id="bateria-text">100.0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Consumo Total</span>
+                        <span class="stat-value" id="stat-consumo">0.0 u</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Recargas</span>
+                        <span class="stat-value" id="stat-recargas">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Obstáculos</span>
+                        <span class="stat-value" id="stat-obstaculos">0</span>
+                    </div>
+                </div>
+
+            </aside>
+        </main>
+
+        <!-- === CONTROLES INFERIORES === -->
+        <footer class="controls-panel">
+
+            <!-- Fila de Parámetros -->
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="combo-vehiculo">Vehículo:</label>
+                    <select id="combo-vehiculo"></select>
+                </div>
+                <div class="control-group">
+                    <label for="combo-prioridad">Prioridad:</label>
+                    <select id="combo-prioridad"></select>
+                </div>
+                <div class="control-group">
+                    <label for="combo-mision">Misión:</label>
+                    <select id="combo-mision"></select>
+                </div>
+            </div>
+
+            <!-- Fila de Botones -->
+            <div class="controls-row">
+                <button class="btn btn-secondary" id="btn-nuevo-mapa">🗺️ Nuevo Mapa</button>
+                <button class="btn btn-primary" id="btn-calcular">🚀 Calcular Ruta (A*)</button>
+                <button class="btn btn-secondary" id="btn-pausa">⏸ Pausar</button>
+                <button class="btn btn-secondary" id="btn-reiniciar">🔄 Reiniciar</button>
+                <button class="btn btn-warning" id="btn-comparar">📊 Comparar Vehículos</button>
+                <button class="btn btn-secondary" id="btn-camara-fps">🎥 1ra Persona</button>
+
+                <div class="slider-group">
+                    <label for="slider-velocidad">⏱️ Velocidad:</label>
+                    <input type="range" id="slider-velocidad" min="30" max="500" value="150" step="10">
+                    <span class="slider-value" id="velocidad-valor">150ms</span>
+                </div>
+
+                <button class="btn btn-primary" id="btn-decisiones" style="background-color: #8957e5;">📋 Tabla de Decisiones</button>
+                <button class="btn btn-success" id="btn-exportar">📄 Exportar Reporte</button>
+            </div>
+
+        </footer>
+
+    </div>
+
+    <!-- === App Module === -->
+    <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
