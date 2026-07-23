@@ -71,6 +71,12 @@ class ModelLoaderSingleton {
                 this._cargarModelo(url).then(scene => {
                     if (scene) {
                         this._normalizarModelo(scene, this.ESCALA_VEHICULO);
+                        
+                        // Corregir rotación del camión de bomberos que viene de lado (código 3)
+                        if (codigo == 3) {
+                            scene.rotation.y = -Math.PI / 2;
+                        }
+                        
                         this.vehiculos[codigo] = { url, scene };
                     }
                 })

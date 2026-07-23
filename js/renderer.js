@@ -720,53 +720,7 @@ export class MapRenderer {
             // Ignorar si estamos moviendo la cámara (botón medio, ctrl+clic o espacio) o si está bloqueado
             if (this.edicionBloqueada || e.button === 1 || (e.button === 0 && e.ctrlKey) || (this.cameraController && this.cameraController.isSpaceDown)) return;
 
-            const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-            this.raycaster.setFromCamera(this.mouse, this.camera);
-            const intersects = this.raycaster.intersectObjects(this.celdaMeshGroup.children);
-
-            if (intersects.length > 0) {
-                const celda = intersects[0].object;
-                const fila = celda.userData.fila;
-                const col = celda.userData.col;
-
-                if (e.button === 0) { // Izq
-                    const obs = Mapa.mapaObstaculos[fila][col];
-                    const childrenToRemove = this.obsGroup.children.filter(child => {
-                        return Math.abs(child.position.x - col) < 0.1 && Math.abs(child.position.z - fila) < 0.1;
-                    });
-                    
-                    if (childrenToRemove.length > 0 || (obs && obs.id !== 0)) {
-                        // Hay un obstáculo lógico o visual (decoración/edificio), eliminarlo
-                        if (obs && obs.id !== 0) {
-                            Mapa.mapaObstaculos[fila][col] = null;
-                        }
-                        childrenToRemove.forEach(child => this.obsGroup.remove(child));
-                        
-                        // Si eliminamos algo, también limpiar de speedBumpCells
-                        if (this._speedBumpCells) this._speedBumpCells.delete(`${fila},${col}`);
-                    } else {
-                        // Celda completamente vacía -> Mover inicio
-                        this.inicio = { fila, col };
-                        this.posicionVehiculo = { fila, col };
-                    }
-                } else if (e.button === 2) { // Der
-                    this.destino = { fila, col };
-                }
-
-                // Parada con tecla 'meta' o dblclick? Vamos a hacerlo con 'p' key
-                // Pero respetemos la lógica del e.ctrlKey si el user lo suelta rápido.
-                
-                Mapa.asegurarAccesibilidad(this.inicio, this.destino);
-                Ruta.reiniciar();
-                this.actualizarRuta();
-
-                if (this.onCambioCoordenada) {
-                    this.onCambioCoordenada(this.inicio, this.parada, this.destino);
-                }
-            }
+            this._handleCanvasTap(e.clientX, e.clientY, e.button);
         });
 
         // ==========================================
@@ -839,13 +793,24 @@ export class MapRenderer {
                     const fila = celda.userData.fila;
                     const col = celda.userData.col;
                     
+                    const obs = Mapa.mapaObstaculos[fila][col];
+                    const childrenToRemove = this.obsGroup.children.filter(child => {
+                        return Math.abs(child.position.x - col) < 0.1 && Math.abs(child.position.z - fila) < 0.1;
+                    });
+                    
+                    const limpiarCelda = () => {
+                        if (childrenToRemove.length > 0 || (obs && obs.id !== 0)) {
+                            if (obs && obs.id !== 0) Mapa.mapaObstaculos[fila][col] = null;
+                            childrenToRemove.forEach(child => this.obsGroup.remove(child));
+                            if (this._speedBumpCells) this._speedBumpCells.delete(`${fila},${col}`);
+                        }
+                    };
+
                     if (this.parada && this.parada.fila === fila && this.parada.col === col) {
                         this.parada = null;
                     } else {
-                        const obs = Mapa.mapaObstaculos[fila][col];
-                        if (!obs || obs.transitable) {
-                            this.parada = { fila, col };
-                        }
+                        limpiarCelda();
+                        this.parada = { fila, col };
                     }
                     Mapa.asegurarAccesibilidad(this.inicio, this.destino);
                     Ruta.reiniciar();
@@ -878,21 +843,25 @@ export class MapRenderer {
             const fila = celda.userData.fila;
             const col = celda.userData.col;
 
-            if (buttonType === 0) { // Izq (Tap Corto)
-                const obs = Mapa.mapaObstaculos[fila][col];
-                const childrenToRemove = this.obsGroup.children.filter(child => {
-                    return Math.abs(child.position.x - col) < 0.1 && Math.abs(child.position.z - fila) < 0.1;
-                });
-                
+            const obs = Mapa.mapaObstaculos[fila][col];
+            const childrenToRemove = this.obsGroup.children.filter(child => {
+                return Math.abs(child.position.x - col) < 0.1 && Math.abs(child.position.z - fila) < 0.1;
+            });
+
+            const limpiarCelda = () => {
                 if (childrenToRemove.length > 0 || (obs && obs.id !== 0)) {
                     if (obs && obs.id !== 0) Mapa.mapaObstaculos[fila][col] = null;
                     childrenToRemove.forEach(child => this.obsGroup.remove(child));
                     if (this._speedBumpCells) this._speedBumpCells.delete(`${fila},${col}`);
-                } else {
-                    this.inicio = { fila, col };
-                    this.posicionVehiculo = { fila, col };
                 }
+            };
+
+            if (buttonType === 0) { // Izq (Tap Corto)
+                limpiarCelda();
+                this.inicio = { fila, col };
+                this.posicionVehiculo = { fila, col };
             } else if (buttonType === 2) { // Der (Long Press)
+                limpiarCelda();
                 this.destino = { fila, col };
                 
                 // Mostrar un feedback visual o vibrar en móvil
@@ -901,10 +870,8 @@ export class MapRenderer {
                 if (this.parada && this.parada.fila === fila && this.parada.col === col) {
                     this.parada = null; // Quitar parada si ya existe
                 } else {
-                    const obs = Mapa.mapaObstaculos[fila][col];
-                    if (!obs || obs.transitable) {
-                        this.parada = { fila, col };
-                    }
+                    limpiarCelda();
+                    this.parada = { fila, col };
                 }
                 if (navigator.vibrate) navigator.vibrate([30, 30, 30]);
             }
