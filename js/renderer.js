@@ -774,9 +774,30 @@ export class MapRenderer {
         // ==========================================
         let touchTimer = null;
         let touchStartPos = { x: 0, y: 0 };
+        let lastTapTime = 0;
+        let lastTapPos = { x: 0, y: 0 };
         
         this.canvas.addEventListener('touchstart', (e) => {
             if (this.edicionBloqueada || e.touches.length > 1) return; // Si hay 2 dedos, está rotando/panneando
+            
+            const currentTime = new Date().getTime();
+            const tapLen = currentTime - lastTapTime;
+            const tapPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            const dist = Math.sqrt(Math.pow(tapPos.x - lastTapPos.x, 2) + Math.pow(tapPos.y - lastTapPos.y, 2));
+            
+            if (tapLen < 300 && tapLen > 0 && dist < 30) {
+                // Double tap detected -> Parada
+                this._handleCanvasTap(tapPos.x, tapPos.y, 3); // 3 = Parada
+                if (touchTimer) {
+                    clearTimeout(touchTimer);
+                    touchTimer = null;
+                }
+                e.preventDefault();
+                return;
+            }
+            
+            lastTapTime = currentTime;
+            lastTapPos = tapPos;
             
             touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
             
@@ -876,6 +897,16 @@ export class MapRenderer {
                 
                 // Mostrar un feedback visual o vibrar en móvil
                 if (navigator.vibrate) navigator.vibrate(50);
+            } else if (buttonType === 3) { // Double Tap (Parada)
+                if (this.parada && this.parada.fila === fila && this.parada.col === col) {
+                    this.parada = null; // Quitar parada si ya existe
+                } else {
+                    const obs = Mapa.mapaObstaculos[fila][col];
+                    if (!obs || obs.transitable) {
+                        this.parada = { fila, col };
+                    }
+                }
+                if (navigator.vibrate) navigator.vibrate([30, 30, 30]);
             }
 
             Mapa.asegurarAccesibilidad(this.inicio, this.destino);
