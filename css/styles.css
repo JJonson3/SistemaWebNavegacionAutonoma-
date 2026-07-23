@@ -76,14 +76,26 @@ body.loaded {
 
 /* --- Header --- */
 .app-header {
-    padding: 20px 28px 14px;
+    padding: 20px 0;
     text-align: center;
     position: relative;
+}
+
+.app-logo {
+    position: absolute;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 70px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
 }
 
 .app-header h1 {
     font-size: 1.55rem;
     font-weight: 800;
+    margin: 0;
+    padding: 0 120px;
     letter-spacing: -0.5px;
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-green));
     background-size: 200% auto;
@@ -98,6 +110,7 @@ body.loaded {
     color: var(--text-muted);
     margin-top: 3px;
     font-weight: 400;
+    padding: 0 120px;
 }
 
 @keyframes shimmer {
@@ -669,14 +682,52 @@ input[type="range"]::-webkit-slider-thumb {
 @media (max-width: 600px) {
     html { font-size: 14px; }
 
-    .app-header { padding: 12px 16px 8px; }
-    .app-header h1 { font-size: 1.2rem; }
+    .app-header { 
+        padding: 15px 10px; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .app-logo {
+        position: static;
+        transform: none;
+        height: 50px;
+        margin-bottom: 5px;
+    }
+    
+    .app-header h1 { 
+        font-size: 1.2rem; 
+        padding: 0;
+    }
+    
+    .app-header .subtitle {
+        padding: 0;
+    }
     
     .instrucciones { display: none; } /* Ocultar en móvil para ganar espacio */
-    .main-content { padding: 0 10px; }
-    .controls-panel { padding: 12px 10px 18px; }
+    
+    .main-content { 
+        display: contents; 
+    }
+    
+    .mapa-container { 
+        order: 1;
+        margin: 0 10px;
+        height: 50vh; 
+        min-height: 350px; 
+    }
 
-    .mapa-container { height: 50vh; min-height: 350px; } /* Más grande en celular */
+    .controls-panel { 
+        order: 2;
+        padding: 12px 10px 18px; 
+    }
+    
+    .stats-panel {
+        order: 3;
+        padding: 0 10px;
+        margin-bottom: 20px;
+    }
 
     .controls-row {
         gap: 8px;
