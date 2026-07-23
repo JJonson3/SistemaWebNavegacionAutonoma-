@@ -653,6 +653,29 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* --- Responsive --- */
 @media (max-width: 900px) {
+    .app-header {
+        padding: 20px 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .app-logo {
+        position: static;
+        transform: none;
+        width: 70px;
+        height: auto;
+    }
+
+    .app-header h1 {
+        padding: 0;
+    }
+
+    .app-header .subtitle {
+        padding: 0;
+    }
+
     /* Mantenemos el main-content a 1 columna */
     .main-content {
         grid-template-columns: 1fr;
@@ -692,8 +715,10 @@ input[type="range"]::-webkit-slider-thumb {
     .app-logo {
         position: static;
         transform: none;
-        height: 50px;
-        margin-bottom: 5px;
+        width: 60px;
+        height: auto;
+        max-width: 100%;
+        margin-bottom: 10px;
     }
     
     .app-header h1 { 
